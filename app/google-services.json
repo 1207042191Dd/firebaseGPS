@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "214322156924",
+    "project_id": "practicagps-b9567",
+    "storage_bucket": "practicagps-b9567.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214322156924:android:dc117b6b8d5ab1f64f00f9",
+        "android_client_info": {
+          "package_name": "com.example.firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSAV6MszuhFpPOM5BZQgRsY5ofOsVO7Vk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
