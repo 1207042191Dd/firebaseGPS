@@ -3,14 +3,9 @@ package com.example.firebase;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,35 +23,21 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mapa;
-    private Marker marker;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
-    private DatabaseReference usuariosRef;
-    private String usuarioID;
-    private boolean usuarioCreado = false;
-
-    private Spinner spinnerUsuarios;
-    private TextView txtLatitud, txtLongitud, txtDireccion;
-    private Map<String, Marker> markers = new HashMap<>();
+    private DatabaseReference ubicacionRef;
+    private TextView txtLatitud, txtLongitud;
+    private Button btnNormal, btnSatelite, btnHibrido, btnTerreno;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,14 +45,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
 
         // Inicializar Firebase
-        usuariosRef = FirebaseDatabase.getInstance().getReference("Usuarios");
-        usuarioID = UUID.randomUUID().toString();
+        ubicacionRef = FirebaseDatabase.getInstance().getReference("ubicacion");
 
         // Inicializar componentes del layout
-        spinnerUsuarios = findViewById(R.id.spinnerUsuarios);
         txtLatitud = findViewById(R.id.txtLatitud);
         txtLongitud = findViewById(R.id.txtLongitud);
-        txtDireccion = findViewById(R.id.txtDireccion);
+
+        // Inicializar botones de tipo de mapa
+        btnNormal = findViewById(R.id.btnNormal);
+        btnSatelite = findViewById(R.id.btnSatelite);
+        btnHibrido = findViewById(R.id.btnHibrido);
+        btnTerreno = findViewById(R.id.btnTerreno);
+
+        // Configurar listeners de botones
+        setupMapTypeButtons();
 
         // Inicializar mapa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -83,30 +70,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Inicializar FusedLocationProviderClient
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // Crear el usuario una sola vez
-        crearUsuario();
-
         // Configurar actualizaciones de ubicación
         setupLocationUpdates();
-
-        // Cargar usuarios existentes en el Spinner
-        cargarUsuarios();
-
-        // Configurar el listener del Spinner
-        configurarSpinnerListener();
     }
 
-    private void configurarSpinnerListener() {
-        spinnerUsuarios.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String usuarioSeleccionado = (String) parent.getItemAtPosition(position);
-                mostrarUbicacionUsuario(usuarioSeleccionado);
+    private void setupMapTypeButtons() {
+        btnNormal.setOnClickListener(v -> {
+            if (mapa != null) {
+                mapa.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             }
+        });
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // No hacer nada
+        btnSatelite.setOnClickListener(v -> {
+            if (mapa != null) {
+                mapa.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            }
+        });
+
+        btnHibrido.setOnClickListener(v -> {
+            if (mapa != null) {
+                mapa.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            }
+        });
+
+        btnTerreno.setOnClickListener(v -> {
+            if (mapa != null) {
+                mapa.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
             }
         });
     }
@@ -117,27 +106,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapa.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mapa.setMyLocationEnabled(true);
-        }
-    }
-
-    private void crearUsuario() {
-        if (!usuarioCreado) {
-            String nombreUsuario = "Usuario " + usuarioID.substring(0, 4);
-
-            Map<String, Object> userData = new HashMap<>();
-            userData.put("nombre", nombreUsuario);
-            userData.put("latitud", 0.0);
-            userData.put("longitud", 0.0);
-            userData.put("direccion", "");
-
-            usuariosRef.child(usuarioID).setValue(userData).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    usuarioCreado = true;
-                    Toast.makeText(MainActivity.this, "Usuario creado exitosamente", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "Error al crear usuario", Toast.LENGTH_SHORT).show();
-                }
-            });
+            mapa.getUiSettings().setZoomControlsEnabled(true); // Agregar controles de zoom
+            mapa.getUiSettings().setCompassEnabled(true); // Habilitar brújula
         }
     }
 
@@ -157,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 if (locationResult.getLastLocation() != null) {
                     Location location = locationResult.getLastLocation();
-                    actualizarPosicionEnFirebase(location);
+                    actualizarUbicacion(location);
                 }
             }
         };
@@ -165,148 +135,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, getMainLooper());
     }
 
-    private void actualizarPosicionEnFirebase(Location location) {
-        if (usuarioCreado) {
-            Map<String, Object> updates = new HashMap<>();
-            updates.put("latitud", location.getLatitude());
-            updates.put("longitud", location.getLongitude());
+    private void actualizarUbicacion(Location location) {
+        double lat = location.getLatitude();
+        double lng = location.getLongitude();
 
-            usuariosRef.child(usuarioID).updateChildren(updates)
-                    .addOnSuccessListener(aVoid -> {
-                        obtenerDireccion(location.getLatitude(), location.getLongitude());
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(MainActivity.this,
-                                "Error al actualizar ubicación", Toast.LENGTH_SHORT).show();
-                    });
-        }
+        // Actualizar Firebase
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("latitud", lat);
+        updates.put("longitud", lng);
+
+        ubicacionRef.setValue(updates)
+                .addOnSuccessListener(aVoid -> {
+                    actualizarUI(lat, lng);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(MainActivity.this,
+                            "Error al actualizar ubicación", Toast.LENGTH_SHORT).show();
+                });
     }
 
-    private void obtenerDireccion(double lat, double lng) {
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-            if (addresses != null && !addresses.isEmpty()) {
-                String direccion = addresses.get(0).getAddressLine(0);
-
-                usuariosRef.child(usuarioID).child("direccion").setValue(direccion)
-                        .addOnSuccessListener(aVoid -> {
-                            actualizarUI(lat, lng, direccion);
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(MainActivity.this,
-                                    "Error al actualizar dirección", Toast.LENGTH_SHORT).show();
-                        });
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void actualizarUI(double lat, double lng, String direccion) {
+    private void actualizarUI(double lat, double lng) {
         LatLng latLng = new LatLng(lat, lng);
 
-        Marker userMarker = markers.get(usuarioID);
-        if (userMarker == null) {
-            userMarker = mapa.addMarker(new MarkerOptions()
-                    .position(latLng)
-                    .title("Tu Posición")
-                    .snippet(direccion));
-            markers.put(usuarioID, userMarker);
-        } else {
-            userMarker.setPosition(latLng);
-            userMarker.setSnippet(direccion);
-        }
+        // Limpiar mapa y agregar nuevo marcador
+        mapa.clear();
+        mapa.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title("Mi Posición"));
 
         mapa.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 
+        // Actualizar TextViews
         txtLatitud.setText(String.format("Latitud: %.5f", lat));
         txtLongitud.setText(String.format("Longitud: %.5f", lng));
-        txtDireccion.setText("Dirección: " + direccion);
-    }
-
-    private void cargarUsuarios() {
-        usuariosRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                List<String> listaUsuarios = new ArrayList<>();
-
-                for (DataSnapshot usuarioSnapshot : snapshot.getChildren()) {
-                    String nombre = usuarioSnapshot.child("nombre").getValue(String.class);
-                    Double latitud = usuarioSnapshot.child("latitud").getValue(Double.class);
-                    Double longitud = usuarioSnapshot.child("longitud").getValue(Double.class);
-                    String direccion = usuarioSnapshot.child("direccion").getValue(String.class);
-
-                    if (nombre != null && latitud != null && longitud != null && direccion != null) {
-                        listaUsuarios.add(nombre);
-                    }
-                }
-
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this,
-                        android.R.layout.simple_spinner_item, listaUsuarios);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                spinnerUsuarios.setAdapter(adapter);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, "Error al cargar usuarios: " +
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void mostrarUbicacionUsuario(String nombreUsuarioSeleccionado) {
-        // Ocultar todos los marcadores
-        for (Marker marker : markers.values()) {
-            marker.setVisible(false);
-        }
-
-        usuariosRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot usuarioSnapshot : snapshot.getChildren()) {
-                    String nombre = usuarioSnapshot.child("nombre").getValue(String.class);
-                    if (nombre != null && nombre.equals(nombreUsuarioSeleccionado)) {
-                        String userId = usuarioSnapshot.getKey();
-                        Double lat = usuarioSnapshot.child("latitud").getValue(Double.class);
-                        Double lng = usuarioSnapshot.child("longitud").getValue(Double.class);
-                        String direccion = usuarioSnapshot.child("direccion").getValue(String.class);
-
-                        if (lat != null && lng != null) {
-                            LatLng latLng = new LatLng(lat, lng);
-
-                            Marker userMarker = markers.get(userId);
-                            if (userMarker == null) {
-                                userMarker = mapa.addMarker(new MarkerOptions()
-                                        .position(latLng)
-                                        .title(nombreUsuarioSeleccionado)
-                                        .snippet(direccion));
-                                markers.put(userId, userMarker);
-                            } else {
-                                userMarker.setPosition(latLng);
-                                userMarker.setTitle(nombreUsuarioSeleccionado);
-                                userMarker.setSnippet(direccion);
-                                userMarker.setVisible(true);
-                            }
-
-                            mapa.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-
-                            txtLatitud.setText(String.format("Latitud: %.5f", lat));
-                            txtLongitud.setText(String.format("Longitud: %.5f", lng));
-                            txtDireccion.setText("Dirección: " + direccion);
-                        }
-                        break;
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, "Error al mostrar ubicación: " +
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     @Override
@@ -320,12 +181,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Limpiar todos los marcadores
-        for (Marker marker : markers.values()) {
-            marker.remove();
-        }
-        markers.clear();
-
         if (fusedLocationClient != null && locationCallback != null) {
             fusedLocationClient.removeLocationUpdates(locationCallback);
         }
