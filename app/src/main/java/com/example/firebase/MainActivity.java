@@ -2,6 +2,7 @@ package com.example.firebase;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationCallback locationCallback;
     private DatabaseReference ubicacionRef;
     private TextView txtLatitud, txtLongitud;
-    private Button btnNormal, btnSatelite, btnHibrido, btnTerreno;
+    private Button btnIrAMainActivity2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,14 +52,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         txtLatitud = findViewById(R.id.txtLatitud);
         txtLongitud = findViewById(R.id.txtLongitud);
 
-        // Inicializar botones de tipo de mapa
-        btnNormal = findViewById(R.id.btnNormal);
-        btnSatelite = findViewById(R.id.btnSatelite);
-        btnHibrido = findViewById(R.id.btnHibrido);
-        btnTerreno = findViewById(R.id.btnTerreno);
-
-        // Configurar listeners de botones
-        setupMapTypeButtons();
+        // Botón para ir a MainActivity2
+        btnIrAMainActivity2 = findViewById(R.id.btnIrAMainActivity2);
+        btnIrAMainActivity2.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, MainActivity2.class);
+            startActivity(intent);
+        });
 
         // Inicializar mapa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -74,40 +73,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setupLocationUpdates();
     }
 
-    private void setupMapTypeButtons() {
-        btnNormal.setOnClickListener(v -> {
-            if (mapa != null) {
-                mapa.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            }
-        });
-
-        btnSatelite.setOnClickListener(v -> {
-            if (mapa != null) {
-                mapa.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-            }
-        });
-
-        btnHibrido.setOnClickListener(v -> {
-            if (mapa != null) {
-                mapa.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-            }
-        });
-
-        btnTerreno.setOnClickListener(v -> {
-            if (mapa != null) {
-                mapa.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-            }
-        });
-    }
-
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mapa = googleMap;
         mapa.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mapa.setMyLocationEnabled(true);
-            mapa.getUiSettings().setZoomControlsEnabled(true); // Agregar controles de zoom
-            mapa.getUiSettings().setCompassEnabled(true); // Habilitar brújula
+            mapa.getUiSettings().setZoomControlsEnabled(true);
+            mapa.getUiSettings().setCompassEnabled(true);
         }
     }
 
@@ -126,8 +99,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 if (locationResult.getLastLocation() != null) {
-                    Location location = locationResult.getLastLocation();
-                    actualizarUbicacion(location);
+                    actualizarUbicacion(locationResult.getLastLocation());
                 }
             }
         };
@@ -145,13 +117,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         updates.put("longitud", lng);
 
         ubicacionRef.setValue(updates)
-                .addOnSuccessListener(aVoid -> {
-                    actualizarUI(lat, lng);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(MainActivity.this,
-                            "Error al actualizar ubicación", Toast.LENGTH_SHORT).show();
-                });
+                .addOnSuccessListener(aVoid -> actualizarUI(lat, lng))
+                .addOnFailureListener(e -> Toast.makeText(MainActivity.this,
+                        "Error al actualizar ubicación", Toast.LENGTH_SHORT).show());
     }
 
     private void actualizarUI(double lat, double lng) {
