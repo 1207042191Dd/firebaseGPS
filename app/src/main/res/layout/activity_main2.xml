@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".MainActivity2">
+
+    <!-- Título -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#009688"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="Localizacion desde Firebase"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <!-- Texto para Latitud -->
+    <TextView
+        android:id="@+id/txtLatitud2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Latitud: "
+        android:textSize="18sp"
+        android:padding="8dp" />
+
+    <!-- Texto para Longitud -->
+    <TextView
+        android:id="@+id/txtLongitud2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Longitud: "
+        android:textSize="18sp"
+        android:padding="8dp" />
+
+    <!-- Botón para volver a MainActivity -->
+    <Button
+        android:id="@+id/btnVolver"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Volver al Monitoreo"
+        android:textSize="18sp"
+        android:padding="8dp"
+        android:background="#FF5722"
+        android:textColor="#FFFFFF" />
+
+    <!-- Fragmento del mapa -->
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>

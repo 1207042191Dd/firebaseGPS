@@ -2,6 +2,7 @@ package com.example.firebase;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationCallback locationCallback;
     private DatabaseReference ubicacionRef;
     private TextView txtLatitud, txtLongitud;
-    private Button btnNormal, btnSatelite, btnHibrido, btnTerreno;
+    private Button btnNormal, btnSatelite, btnHibrido, btnTerreno, btnIrAMainActivity2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +57,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         btnSatelite = findViewById(R.id.btnSatelite);
         btnHibrido = findViewById(R.id.btnHibrido);
         btnTerreno = findViewById(R.id.btnTerreno);
+
+        // Botón para ir a MainActivity2
+        btnIrAMainActivity2 = findViewById(R.id.btnIrAMainActivity2);
+        btnIrAMainActivity2.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, MainActivity2.class);
+            startActivity(intent);
+        });
 
         // Configurar listeners de botones
         setupMapTypeButtons();

@@ -26,6 +26,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".MainActivity2"
+            android:label="Mapa desde Firebase" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"/>

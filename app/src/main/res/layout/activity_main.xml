@@ -4,17 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#FFFFFF"
     tools:context=".MainActivity">
 
-    <!-- Título con fondo verde más brillante -->
+    <!-- Título con fondo azul -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#009688"
+        android:background="#2196F3"
         android:gravity="center"
-        android:padding="10dp"
+        android:padding="16dp"
         android:text="Monitoreo de posición"
-        android:textColor="#000000"
+        android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -23,7 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="#E3F2FD">
 
         <!-- Latitud -->
         <TextView
@@ -31,9 +33,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Latitud"
+            android:text="Latitud: "
             android:textColor="#000000"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:padding="8dp" />
 
         <!-- Longitud -->
         <TextView
@@ -41,58 +44,98 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Longitud"
+            android:text="Longitud: "
             android:textColor="#000000"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:padding="8dp" />
 
     </LinearLayout>
 
     <!-- Contenedor para botones de tipo de mapa -->
-    <HorizontalScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#FFFFFF">
 
+        <!-- Fila 1 de botones -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="8dp">
 
             <Button
                 android:id="@+id/btnNormal"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="Normal" />
+                android:layout_weight="1"
+                android:text="Normal"
+                android:backgroundTint="#4CAF50"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_marginEnd="8dp" />
 
             <Button
                 android:id="@+id/btnSatelite"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="Satélite" />
+                android:layout_weight="1"
+                android:text="Satélite"
+                android:backgroundTint="#FF9800"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_marginEnd="8dp" />
+        </LinearLayout>
+
+        <!-- Fila 2 de botones -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp">
 
             <Button
                 android:id="@+id/btnHibrido"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="Híbrido" />
+                android:layout_weight="1"
+                android:text="Híbrido"
+                android:backgroundTint="#9C27B0"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_marginEnd="8dp" />
 
             <Button
                 android:id="@+id/btnTerreno"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Terreno" />
-
+                android:layout_weight="1"
+                android:text="Terreno"
+                android:backgroundTint="#F44336"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
         </LinearLayout>
-    </HorizontalScrollView>
+
+        <!-- Botón para ir a MainActivity2 -->
+        <Button
+            android:id="@+id/btnIrAMainActivity2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ver Mapa desde Firebase"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
 
     <!-- Fragmento del mapa -->
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="16dp" />
 
 </LinearLayout>
